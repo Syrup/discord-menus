@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import fetch from 'node-fetch';
-import { Client, MessageEmbed, Message } from 'discord.js';
+import { Client, EmbedBuilder, Message, CommandInteraction, Embed, APIEmbed } from 'discord.js';
 
 import { Menu } from './Menu';
 import { ButtonBuilder } from './ButtonBuilder';
@@ -14,10 +14,15 @@ type Warns = 'NO_MENU_PROVIDED' | 'NO_BUTTON_PROVIDED';
 
 interface DiscordMenusEvents {
   MENU_CLICKED: [menu: Menu];
+  menuClicked: [menu: Menu]
   ERROR: [error: Errors];
+  error: [error: Errors];
   WARN: [warn: Warns];
+  warn: [warn: Warns];
   READY: [];
+  ready: [];
   BUTTON_CLICKED: [button: Button];
+  buttonClicked: [button: Button];
 }
 
 export declare interface DiscordMenus extends EventEmitter {
@@ -51,7 +56,8 @@ export class DiscordMenus extends EventEmitter {
    * Discord.JS client
    * @type {Client}
    */
-  public client: any;
+  public client: Client;
+  public payload: { content: string, embeds: Embed[] | APIEmbed[], components: object[] }
 
   /**
    * Create a new DiscordMenus
@@ -63,42 +69,44 @@ export class DiscordMenus extends EventEmitter {
     if (!client) throw new SyntaxError('INVALID_DISCORD_CLIENT');
     this.client = client;
     this._awaitEvents();
+    this.payload = {
+      content: '',
+      embeds: [],
+      components: []
+    }
   }
 
   /**
    * Send the menu
-   * @param {Message} message
-   * @param {string|MessageEmbed} content
+   * @param {Message|CommandInteraction} message
+   * @param {string|EmbedBuilder} content
    * @param {SendOptions} options
    * @returns {Promise<SentMessage>}
-   * @example MenusManager.sendMenu(message, 'content', { menu: myCoolMenu });
+   * @example
+   * MenusManager.sendMenu(message, 'content', { menu: myCoolMenu });
+   * MenusManager.sendMenu(interaction, 'content', { menu: myCoolMenu });
    */
   public async sendMenu(
-    message: Message,
-    content: string | MessageEmbed,
+    message: Message | CommandInteraction,
+    content: string | EmbedBuilder,
     options?: SendOptionsMenu,
   ): Promise<SentMessage> {
     if (!content) throw new SyntaxError('INVALID_MESSAGE');
-    const payload = {
-      content: '' as any,
-      embeds: [] as any,
-      components: [] as any,
-    };
     let returnData;
     switch (typeof content) {
       case 'string':
-        payload.content = content;
+        this.payload.content = content;
         break;
       default:
         try {
-          payload.embeds = [content.toJSON()];
+          this.payload.embeds = [content.toJSON()];
         } catch (err) {
           throw new Error('INVALID_CONTENT ' + err);
         }
         break;
     }
     if (options?.menu) {
-      payload.components = [
+      this.payload.components = [
         {
           type: 1,
           components: [options.menu.getJSON()],
@@ -106,21 +114,23 @@ export class DiscordMenus extends EventEmitter {
       ];
     } else {
       this.emit('WARN', 'NO_MENU_PROVIDED');
+      this.emit('warn',  "NO_MENU_PROVIDED");
     }
-    await fetch(`https://discord.com/api/v9/channels/${message.channel.id}/messages`, {
+    await fetch(`https://discord.com/api/v9/channels/${message.channel!.id}/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bot ' + this.client.token,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(this.payload),
     }).then(async (res) => {
       if (res.status !== 200) {
         this.emit('ERROR', 'POST_ERROR');
+        this.emit("error", "POST_ERROR");
       }
       returnData = await res.json();
     });
-    return new SentMessage(returnData, this.client.token, this);
+    return new SentMessage(returnData, this.client.token!, this);
   }
 
   /**
@@ -133,30 +143,25 @@ export class DiscordMenus extends EventEmitter {
    */
   public async sendButton(
     message: Message,
-    content: string | MessageEmbed,
+    content: string | EmbedBuilder,
     options?: SendOptionsButton,
   ): Promise<SentMessage> {
     if (!content) throw new SyntaxError('INVALID_MESSAGE');
-    const payload = {
-      content: '' as any,
-      embeds: [] as any,
-      components: [] as any,
-    };
     let returnData;
     switch (typeof content) {
       case 'string':
-        payload.content = content;
+        this.payload.content = content;
         break;
       default:
         try {
-          payload.embeds = [content.toJSON()];
+          this.payload.embeds = [content.toJSON()];
         } catch (err) {
           throw new Error('INVALID_CONTENT ' + err);
         }
         break;
     }
     if (options?.buttons) {
-      payload.components = [
+      this.payload.components = [
         {
           type: 1,
           components: Array.isArray(options.buttons)
@@ -173,23 +178,27 @@ export class DiscordMenus extends EventEmitter {
         'Content-Type': 'application/json',
         Authorization: 'Bot ' + this.client.token,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(this.payload),
     }).then(async (res) => {
       if (res.status !== 200) {
         this.emit('ERROR', 'POST_ERROR');
+        this.emit('error', 'POST_ERROR');
       }
       returnData = await res.json();
     });
-    return new SentMessage(returnData, this.client.token, this);
+    return new SentMessage(returnData, this.client.token!, this);
   }
 
   private async _awaitEvents(): Promise<void> {
     this.emit('READY');
-    this.client.ws.on('INTERACTION_CREATE', (interaction: any) => {
+    this.emit('ready')
+    this.client.on('interactionCreate', (interaction: any) => {
       if (interaction.data.component_type === 3) {
-        this.emit('MENU_CLICKED', new Menu(interaction, this.client.token, this));
+        this.emit('MENU_CLICKED', new Menu(interaction, this.client.token!, this));
+        this.emit('menuClicked', new Menu(interaction, this.client.token!, this))
       } else if (interaction.data.component_type === 2) {
-        this.emit('BUTTON_CLICKED', new Button(interaction, this.client.token, this));
+        this.emit('BUTTON_CLICKED', new Button(interaction, this.client.token!, this));
+        this.emit('buttonClicked', new Button(interaction, this.client.token!, this))
       }
     });
   }

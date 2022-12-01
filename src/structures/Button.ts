@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { EventEmitter } from 'events';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 import { Message } from './Message';
 import { ButtonBuilder } from './ButtonBuilder';
@@ -119,12 +119,12 @@ export class Button {
 
   /**
    * Reply to the interaction
-   * @param {string|MessageEmbed} message
+   * @param {string|EmbedBuilder} message
    * @param {MessageOptions} options
    * @returns {Promise<void>}
    * @example button.reply('some content');
    */
-  public async reply(message: string | MessageEmbed, options?: MessageOptions): Promise<void> {
+  public async reply(message: string | EmbedBuilder, options?: MessageOptions): Promise<void> {
     if (!message) throw new SyntaxError('INVALID_MESSAGE');
     const payload = {
       content: '' as any,
@@ -167,6 +167,7 @@ export class Button {
     }).then((res) => {
       if (res.status !== 200) {
         this.emitter.emit('ERROR', 'POST_ERROR');
+        this.emitter.emit('error', 'POST_ERROR');
       }
       return;
     });
@@ -180,7 +181,7 @@ export class Button {
    * @returns {Promise<void>}
    * @example button.edit('some edit');
    */
-  public async edit(message: string | MessageEmbed, options?: MessageOptions): Promise<void> {
+  public async edit(message: string | EmbedBuilder, options?: MessageOptions): Promise<void> {
     if (!message) throw new SyntaxError('INVALID_MESSAGE');
     const payload = {
       content: '',
@@ -222,6 +223,7 @@ export class Button {
     }).then((res) => {
       if (res.status !== 200) {
         this.emitter.emit('ERROR', 'POST_ERROR');
+        this.emitter.emit('error', 'POST_ERROR');
       }
       return;
     });
@@ -250,6 +252,7 @@ export class Button {
     }).then((res) => {
       if (res.status !== 200) {
         this.emitter.emit('ERROR', 'POST_ERROR');
+        this.emitter.emit('error', 'POST_ERROR');
       }
       return;
     });
@@ -274,6 +277,7 @@ export class Button {
     }).then((res) => {
       if (res.status !== 200) {
         this.emitter.emit('ERROR', 'POST_ERROR');
+        this.emitter.emit('error', 'POST_ERROR');
       }
       return;
     });

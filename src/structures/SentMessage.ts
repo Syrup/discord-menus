@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import fetch from 'node-fetch';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 import { ButtonBuilder } from './ButtonBuilder';
 import { MenuBuilder } from './MenuBuilder';
@@ -136,6 +136,7 @@ export class SentMessage {
     }).then((res) => {
       if (res.status !== 204) {
         this.emitter.emit('ERROR', 'DELETE_ERROR');
+        this.emitter.emit("error", "DELETE_ERROR");
       }
       return;
     });
@@ -144,12 +145,12 @@ export class SentMessage {
 
   /**
    * Edit the sent message
-   * @param {string|MessageEmbed} message
+   * @param {string|EmbedBuilder} message
    * @param {SendOptions} options
    * @returns {Promise<void>}
    * @example messahe.edit('some edit');
    */
-  public async edit(message: string | MessageEmbed, options?: MessageOptions): Promise<void> {
+  public async edit(message: string | EmbedBuilder, options?: MessageOptions): Promise<void> {
     if (!message) throw new SyntaxError('INVALID_MESSAGE');
     const payload = {
       content: '',
@@ -197,6 +198,7 @@ export class SentMessage {
     }).then((res) => {
       if (res.status !== 200) {
         this.emitter.emit('ERROR', 'POST_ERROR');
+        this.emitter.emit('error', 'POST_ERROR');
       }
       return;
     });

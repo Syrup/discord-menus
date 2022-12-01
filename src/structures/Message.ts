@@ -128,6 +128,7 @@ export class Message {
     }).then((res) => {
       if (res.status !== 204) {
         this.emitter.emit('ERROR', 'DELETE_ERROR');
+        this.emitter.emit('error', 'DELETE_ERROR');
       }
       return;
     });
