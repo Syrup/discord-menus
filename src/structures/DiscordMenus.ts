@@ -14,7 +14,7 @@ type Warns = 'NO_MENU_PROVIDED' | 'NO_BUTTON_PROVIDED';
 
 interface DiscordMenusEvents {
   MENU_CLICKED: [menu: Menu];
-  menuClicked: [menu: Menu]
+  menuClicked: [menu: Menu];
   ERROR: [error: Errors];
   error: [error: Errors];
   WARN: [warn: Warns];
@@ -57,7 +57,7 @@ export class DiscordMenus extends EventEmitter {
    * @type {Client}
    */
   public client: Client;
-  public payload: { content: string, embeds: Embed[] | APIEmbed[], components: object[] }
+  public payload: { content: string; embeds: Embed[] | APIEmbed[]; components: object[] };
 
   /**
    * Create a new DiscordMenus
@@ -72,8 +72,8 @@ export class DiscordMenus extends EventEmitter {
     this.payload = {
       content: '',
       embeds: [],
-      components: []
-    }
+      components: [],
+    };
   }
 
   /**
@@ -114,7 +114,7 @@ export class DiscordMenus extends EventEmitter {
       ];
     } else {
       this.emit('WARN', 'NO_MENU_PROVIDED');
-      this.emit('warn',  "NO_MENU_PROVIDED");
+      this.emit('warn', 'NO_MENU_PROVIDED');
     }
     await fetch(`https://discord.com/api/v9/channels/${message.channel!.id}/messages`, {
       method: 'POST',
@@ -126,7 +126,7 @@ export class DiscordMenus extends EventEmitter {
     }).then(async (res) => {
       if (res.status !== 200) {
         this.emit('ERROR', 'POST_ERROR');
-        this.emit("error", "POST_ERROR");
+        this.emit('error', 'POST_ERROR');
       }
       returnData = await res.json();
     });
@@ -191,14 +191,14 @@ export class DiscordMenus extends EventEmitter {
 
   private async _awaitEvents(): Promise<void> {
     this.emit('READY');
-    this.emit('ready')
+    this.emit('ready');
     this.client.on('interactionCreate', (interaction: any) => {
       if (interaction.data.component_type === 3) {
         this.emit('MENU_CLICKED', new Menu(interaction, this.client.token!, this));
-        this.emit('menuClicked', new Menu(interaction, this.client.token!, this))
+        this.emit('menuClicked', new Menu(interaction, this.client.token!, this));
       } else if (interaction.data.component_type === 2) {
         this.emit('BUTTON_CLICKED', new Button(interaction, this.client.token!, this));
-        this.emit('buttonClicked', new Button(interaction, this.client.token!, this))
+        this.emit('buttonClicked', new Button(interaction, this.client.token!, this));
       }
     });
   }
