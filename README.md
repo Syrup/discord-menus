@@ -7,6 +7,8 @@
 </p>
 <br>
 
+NOTE: this is not completed yet.
+
 ## 🔩 Installation
 NPM version:
 ```
@@ -29,6 +31,7 @@ import { DiscordMenus } from 'discord-menus';
 
 All the code examples are available in the `tests` folder of the project, available on **[Github](https://github.com/RemyK888/discord-menus)**, the documentation is coming soon, for more information, join the **[RemyK Discord server](https://discord.gg/ZCzxymB)**
 
+message:
 ```javascript
 const { DiscordMenus, ButtonBuilder, MenuBuilder } = require('discord-menus');
 const { Client, EmbedBuilder }  = require('discord.js');
@@ -50,7 +53,7 @@ const myCoolMenu = new MenuBuilder()
     .setPlaceHolder('Select an option');
 
 client.on('message', async (message) => {
-    if (message.content === 'menu') {
+    if (message.content === '!menu') {
         await MenusManager.sendMenu(message, new EmbedBuilder().setDescription('Hello world!'), { menu: myCoolMenu }).then(msg => {
             console.log(msg.id);
             await msg.edit('Some edit');
@@ -58,13 +61,53 @@ client.on('message', async (message) => {
     }
 });
 
-MenusManager.on('MENU_CLICKED', (menu) => {
+MenusManager.on('menuClicked', (menu) => {
     menu.reply('some reply')
     console.log(menu.values);
 });
 
-client.login('');
+client.login('token');
 ```
+
+interaction:
+```javascript
+const { DiscordMenus, ButtonBuilder, MenuBuilder } = require('discord-menus');
+const { Client, EmbedBuilder }  = require('discord.js');
+
+const client = new Client();
+const MenusManager = new DiscordMenus(client);
+
+const myCoolMenu = new MenuBuilder()
+    .addLabel('Value 1', { description: 'This the value 1 description', value: 'value-1' })
+    .addLabel('Value 2', { description: 'This is the value 2 description', value: 'value-2' })
+    .addLabel('Value 3', {
+        description: 'This is the value 3 description (with an emoji)', value: 'value-3', emoji: {
+            name: '🌌'
+        }
+    })
+    .setMaxValues(3)
+    .setMinValues(1)
+    .setCustomID('cool-custom-id')
+    .setPlaceHolder('Select an option');
+
+client.on('interactionCreate', async (interaction) => {
+    if(!interaction.isCommand()) return
+    if (interaction.commandName === '!menu') {
+        await MenusManager.sendMenu(interaction, new EmbedBuilder().setDescription('Hello world!'), { menu: myCoolMenu }).then(m => {
+            console.log(msg.id);
+            await msg.edit('Some edit');
+        })
+    }
+});
+
+MenusManager.on('menuClicked', (menu) => {
+    menu.reply('some reply')
+    console.log(menu.values);
+});
+
+client.login('token');
+```
+
 <br>
 
 ## 📷 Image
