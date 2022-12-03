@@ -8,8 +8,14 @@
 <br>
 
 ## 🔩 Installation
+NPM version:
 ```
 npm install discord-menus@latest
+```
+
+fork version:
+```
+npm install github:Syrup/discord-menus
 ```
 
 ## 🌌 Setup
@@ -25,7 +31,7 @@ All the code examples are available in the `tests` folder of the project, availa
 
 ```javascript
 const { DiscordMenus, ButtonBuilder, MenuBuilder } = require('discord-menus');
-const { Client, MessageEmbed }  = require('discord.js');
+const { Client, EmbedBuilder }  = require('discord.js');
 
 const client = new Client();
 const MenusManager = new DiscordMenus(client);
@@ -45,7 +51,7 @@ const myCoolMenu = new MenuBuilder()
 
 client.on('message', async (message) => {
     if (message.content === 'menu') {
-        await MenusManager.sendMenu(message, new MessageEmbed().setDescription('Hello world!'), { menu: myCoolMenu }).then(msg => {
+        await MenusManager.sendMenu(message, new EmbedBuilder().setDescription('Hello world!'), { menu: myCoolMenu }).then(msg => {
             console.log(msg.id);
             await msg.edit('Some edit');
         })
