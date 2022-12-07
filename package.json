@@ -2,7 +2,7 @@
   "name": "discord-menus",
   "version": "1.2.0",
   "description": "Create beautiful menus in Discord, with ease!",
-  "main": "./src/index.ts",
+  "main": "./typings/src/index.js",
   "directories": {
     "test": "tests"
   },

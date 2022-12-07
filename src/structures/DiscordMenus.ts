@@ -135,14 +135,14 @@ export class DiscordMenus extends EventEmitter {
 
   /**
    * Send the menu
-   * @param {Message} message
+   * @param {Message|CommandInteraction} message
    * @param {string|MessageEmbed} content
    * @param {SendOptions} options
    * @returns {Promise<SentMessage>}
    * @example MenusManager.sendButton(message, 'content', { buttons: [button1, button2] });
    */
   public async sendButton(
-    message: Message,
+    message: Message | CommandInteraction,
     content: string | EmbedBuilder,
     options?: SendOptionsButton,
   ): Promise<SentMessage> {
@@ -171,8 +171,9 @@ export class DiscordMenus extends EventEmitter {
       ];
     } else {
       this.emit('WARN', 'NO_BUTTON_PROVIDED');
+      this.emit('warn', 'NO_BUTTON_PROVIDED');
     }
-    await fetch(`https://discord.com/api/v9/channels/${message.channel.id}/messages`, {
+    await fetch(`https://discord.com/api/v9/channels/${message.channel!.id}/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

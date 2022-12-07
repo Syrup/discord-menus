@@ -38,7 +38,7 @@ class DiscordMenus extends events_1.EventEmitter {
         this.payload = {
             content: '',
             embeds: [],
-            components: []
+            components: [],
         };
     }
     /**
@@ -79,7 +79,7 @@ class DiscordMenus extends events_1.EventEmitter {
             }
             else {
                 this.emit('WARN', 'NO_MENU_PROVIDED');
-                this.emit('warn', "NO_MENU_PROVIDED");
+                this.emit('warn', 'NO_MENU_PROVIDED');
             }
             yield node_fetch_1.default(`https://discord.com/api/v9/channels/${message.channel.id}/messages`, {
                 method: 'POST',
@@ -91,7 +91,7 @@ class DiscordMenus extends events_1.EventEmitter {
             }).then((res) => __awaiter(this, void 0, void 0, function* () {
                 if (res.status !== 200) {
                     this.emit('ERROR', 'POST_ERROR');
-                    this.emit("error", "POST_ERROR");
+                    this.emit('error', 'POST_ERROR');
                 }
                 returnData = yield res.json();
             }));
@@ -100,7 +100,7 @@ class DiscordMenus extends events_1.EventEmitter {
     }
     /**
      * Send the menu
-     * @param {Message} message
+     * @param {Message|CommandInteraction} message
      * @param {string|MessageEmbed} content
      * @param {SendOptions} options
      * @returns {Promise<SentMessage>}
@@ -136,6 +136,7 @@ class DiscordMenus extends events_1.EventEmitter {
             }
             else {
                 this.emit('WARN', 'NO_BUTTON_PROVIDED');
+                this.emit("warn", 'NO_BUTTON_PROVIDED');
             }
             yield node_fetch_1.default(`https://discord.com/api/v9/channels/${message.channel.id}/messages`, {
                 method: 'POST',
